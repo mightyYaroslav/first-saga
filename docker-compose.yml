@@ -1,0 +1,27 @@
+services:
+  redis:
+    image: redis
+    networks:
+      - webnet
+  db:
+    image: postgres
+    networks:
+      - webnet
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: calendar
+  web:
+    image: consumer-service
+    ports:
+      - "5000:5000"
+    networks:
+      - webnet
+    environment:
+      HOST: 0.0.0.0
+      PORT: 5000
+      DB_HOST: db
+      REDIS_HOST: redis
+    command: ["./wait-for-it.sh", "db:5432", "--", "node", "index.js"]
+networks:
+  webnet:

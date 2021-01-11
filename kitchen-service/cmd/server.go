@@ -58,9 +58,9 @@ func init() {
 	rootCmd.AddCommand(serverCommand)
 	serverFlags = flags.New("server", serverCommand)
 
-	serverFlags.RegisterInt("port", "p", 8080, "Port of the server", "PORT")
-	serverFlags.RegisterString("host", "h", "0.0.0.0", "Host of the server", "HOST")
+	serverFlags.RegisterInt("port", "", 8080, "Port of the server", "PORT")
+	serverFlags.RegisterString("host", "", "0.0.0.0", "Host of the server", "HOST")
 
-	serverFlags.RegisterString("db-host", "db-host", "mongo", "Host of the database", "DB_HOST")
-	serverFlags.RegisterInt("db-port", "db-port", 27017, "Port of the database", "DB_PORT")
+	serverFlags.RegisterString("db-host", "", "mongo", "Host of the database", "DB_HOST")
+	serverFlags.RegisterInt("db-port", "", 27017, "Port of the database", "DB_PORT")
 }

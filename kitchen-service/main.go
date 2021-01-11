@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"github.com/mightyYaroslav/first-saga/kitchen-service/cmd"
 )
 
 func main() {
-	fmt.Println("Hello world!")
+	cmd.Execute()
 }
