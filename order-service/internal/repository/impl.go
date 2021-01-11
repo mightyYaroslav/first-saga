@@ -12,18 +12,18 @@ type OrderAdapter struct {
 	mongoClient *mongo.Client
 }
 
-func (o *OrderAdapter) CreateOrder(ticketId, title, description, status string, totalPrice int) (*entity.Order, error) {
+func (o *OrderAdapter) CreateOrder(params *CreateOrderParams) (*entity.Order, error) {
 	collection := o.mongoClient.Database("example").Collection("order")
-	hex, err := primitive.ObjectIDFromHex(ticketId)
+	hex, err := primitive.ObjectIDFromHex(params.TicketId)
 	if err != nil {
 		return nil, err
 	}
 	order := entity.Order{
 		TicketId:    hex,
-		Title:       title,
-		Description: description,
-		TotalPrice:  totalPrice,
-		Status:      status,
+		Title:       params.Title,
+		Description: params.Description,
+		TotalPrice:  params.TotalPrice,
+		Status:      params.Status,
 	}
 	res, err := collection.InsertOne(context.Background(), order)
 	if err != nil {

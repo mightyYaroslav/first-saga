@@ -3,12 +3,38 @@ package repository
 import (
 	"context"
 
+	"github.com/mightyYaroslav/first-saga/kitchen-service/internal/entity"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type TicketAdapter struct {
 	mongoClient *mongo.Client
+}
+
+func (o *TicketAdapter) Create(req *CreateTicketParams) (*entity.Ticket, error) {
+	collection := o.mongoClient.Database("example").Collection("ticket")
+	hexId, err := primitive.ObjectIDFromHex(req.Id)
+	if err != nil {
+		return nil, err
+	}
+	hexOrderId, err := primitive.ObjectIDFromHex(req.OrderId)
+	if err != nil {
+		return nil, err
+	}
+	order := entity.Ticket{
+		ID:      hexId,
+		OrderId: hexOrderId,
+		Title:   req.Title,
+		Dishes:  req.Dishes,
+		Status:  "pending",
+	}
+	res, err := collection.InsertOne(context.Background(), order)
+	if err != nil {
+		return nil, err
+	}
+	order.ID = res.InsertedID.(primitive.ObjectID)
+	return &order, nil
 }
 
 func (o *TicketAdapter) Approve(ticketId string) error {

@@ -13,8 +13,19 @@ type CreateOrderConfig struct {
 	OrderRepository repository.Order
 }
 
-func (co *CreateOrder) Execute(ticketId, title, description, status string, totalPrice int) (*entity.Order, error) {
-	return co.orderRepository.CreateOrder(ticketId, title, description, status, totalPrice)
+type CreateOrderParams struct {
+	TicketId, Title, Description, Status string
+	TotalPrice                           int
+}
+
+func (co *CreateOrder) Execute(params *CreateOrderParams) (*entity.Order, error) {
+	return co.orderRepository.CreateOrder(&repository.CreateOrderParams{
+		TicketId:    params.TicketId,
+		Title:       params.Title,
+		Description: params.Description,
+		Status:      params.Status,
+		TotalPrice:  params.TotalPrice,
+	})
 }
 
 func NewCreateOrder(config *CreateOrderConfig) CreateOrder {

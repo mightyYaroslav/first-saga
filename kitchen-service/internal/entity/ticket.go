@@ -10,4 +10,6 @@ type Ticket struct {
 	Title string `json:"title,omitempty"`
 
 	Status string `json:"status,omitempty"`
+
+	Dishes []string `json:"dishes,omitempty"`
 }

@@ -28,11 +28,13 @@ func NewCreateOrder(config *CreateOrderConfig) func(w http.ResponseWriter, r *ht
 			return
 		}
 		_, err = config.CreateOrder.Execute(
-			request.TicketId,
-			request.Title,
-			request.Description,
-			request.Status,
-			request.TotalPrice,
+			&usecase.CreateOrderParams{
+				TicketId:    request.TicketId,
+				Title:       request.Title,
+				Description: request.Description,
+				Status:      request.Status,
+				TotalPrice:  request.TotalPrice,
+			},
 		)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

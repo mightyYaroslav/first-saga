@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/mightyYaroslav/first-saga/order-service/internal/usecase"
+	"github.com/mightyYaroslav/first-saga/kitchen-service/internal/usecase"
 )
 
 type RejectTicketConfig struct {
@@ -12,7 +12,7 @@ type RejectTicketConfig struct {
 }
 
 type RejectTicketRequest struct {
-	OrderId string `json:"order_id"`
+	TicketId string `json:"ticket_id"`
 }
 
 func NewRejectTicket(config *RejectTicketConfig) func(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +23,7 @@ func NewRejectTicket(config *RejectTicketConfig) func(w http.ResponseWriter, r *
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		err = config.RejectTicket.Execute(request.OrderId)
+		err = config.RejectTicket.Execute(request.TicketId)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

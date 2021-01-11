@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/mightyYaroslav/first-saga/order-service/internal/handlers"
-	"github.com/mightyYaroslav/first-saga/order-service/internal/repository"
-	"github.com/mightyYaroslav/first-saga/order-service/internal/usecase"
+	"github.com/mightyYaroslav/first-saga/kitchen-service/internal/handlers"
+	"github.com/mightyYaroslav/first-saga/kitchen-service/internal/repository"
+	"github.com/mightyYaroslav/first-saga/kitchen-service/internal/usecase"
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -31,10 +31,12 @@ var serverCommand = &cobra.Command{
 		}
 
 		ticketRepository := repository.NewTicketRepositoryAdapter(&repository.TicketRepositoryAdapterConfig{MongoClient: client})
-		approveTicket := usecase.NewApproveOrder(&usecase.ApproveTicketConfig{TicketRepository: ticketRepository})
-		rejectTicket := usecase.NewRejectOrder(&usecase.RejectTicketConfig{TicketRepository: ticketRepository})
+		createTicket := usecase.NewCreateTicket(&usecase.CreateTicketConfig{TicketRepository: ticketRepository})
+		approveTicket := usecase.NewApproveTicket(&usecase.ApproveTicketConfig{TicketRepository: ticketRepository})
+		rejectTicket := usecase.NewRejectTicket(&usecase.RejectTicketConfig{TicketRepository: ticketRepository})
 
 		r := mux.NewRouter()
+		r.HandleFunc("/ticket/create", handlers.NewCreateTicket(&handlers.CreateTicketConfig{CreateTicket: createTicket})).Methods("POST")
 		r.HandleFunc("/ticket/approved", handlers.NewApproveTicket(&handlers.ApproveTicketConfig{ApproveTicket: approveTicket})).Methods("PUT")
 		r.HandleFunc("/ticket/rejected", handlers.NewRejectTicket(&handlers.RejectTicketConfig{RejectTicket: rejectTicket})).Methods("PUT")
 		http.Handle("/", r)
