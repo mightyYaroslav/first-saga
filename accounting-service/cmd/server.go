@@ -6,8 +6,11 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/mightyYaroslav/first-saga/accounting-service/internal/handlers"
+	"github.com/mightyYaroslav/first-saga/core/flags"
 	"github.com/spf13/cobra"
 )
+
+var serverFlags *flags.Flags
 
 var serverCommand = &cobra.Command{
 	Use:   "server",
@@ -18,7 +21,7 @@ var serverCommand = &cobra.Command{
 		http.Handle("/", r)
 
 		// TODO: move it to env
-		err := http.ListenAndServe("localhost:8080", r)
+		err := http.ListenAndServe(serverFlags.GetString("host")+":"+serverFlags.GetString("port"), r)
 		if err != nil {
 			log.Fatalf("Could not server the HTTP server as %s:%s", "localhost", "8080")
 		}
@@ -27,4 +30,8 @@ var serverCommand = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(serverCommand)
+	serverFlags = flags.New("server", serverCommand)
+
+	serverFlags.RegisterInt("port", "p", 8080, "Port of the server", "PORT")
+	serverFlags.RegisterString("host", "h", "0.0.0.0", "Host of the server", "HOST")
 }

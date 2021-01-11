@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/mightyYaroslav/first-saga/core/flags"
 	"github.com/mightyYaroslav/first-saga/kitchen-service/internal/handlers"
 	"github.com/mightyYaroslav/first-saga/kitchen-service/internal/repository"
 	"github.com/mightyYaroslav/first-saga/kitchen-service/internal/usecase"
@@ -15,12 +16,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var serverFlags *flags.Flags
+
 var serverCommand = &cobra.Command{
 	Use:   "server",
 	Short: "Run the kitchen service server",
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Fill this in
-		client, err := mongo.NewClient(options.Client().ApplyURI(""))
+		client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://" + serverFlags.GetString("db-host") + ":" + serverFlags.GetString("db-port")))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -42,7 +45,7 @@ var serverCommand = &cobra.Command{
 		http.Handle("/", r)
 
 		// TODO: move it to env
-		err = http.ListenAndServe("localhost:8080", r)
+		err = http.ListenAndServe(serverFlags.GetString("host")+":"+serverFlags.GetString("port"), r)
 		if err != nil {
 			log.Fatalf("Could not server the HTTP server as %s:%s", "localhost", "8080")
 		}
@@ -53,4 +56,11 @@ var serverCommand = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(serverCommand)
+	serverFlags = flags.New("server", serverCommand)
+
+	serverFlags.RegisterInt("port", "p", 8080, "Port of the server", "PORT")
+	serverFlags.RegisterString("host", "h", "0.0.0.0", "Host of the server", "HOST")
+
+	serverFlags.RegisterString("db-host", "db-host", "mongo", "Host of the database", "DB_HOST")
+	serverFlags.RegisterInt("db-port", "db-port", 27017, "Port of the database", "DB_PORT")
 }
