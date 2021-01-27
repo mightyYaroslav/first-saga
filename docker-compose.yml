@@ -1,27 +1,67 @@
+version: '3.8'
 services:
-  redis:
-    image: redis
-    networks:
-      - webnet
-  db:
-    image: postgres
-    networks:
-      - webnet
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: calendar
-  web:
-    image: consumer-service
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+      args:
+        GITHUB_DEPLOY_KEY: exec cat ~/.ssh/git
+    env_file: ./order-service/env/.env.compose
     ports:
       - "5000:5000"
-    networks:
-      - webnet
+    restart: unless-stopped
+
+  kitchen-service:
+    build:
+      context: ./kitchen-service
+      dockerfile: Dockerfile
+      args:
+        GITHUB_DEPLOY_KEY: exec cat ~/.ssh/git
+    env_file: ./kitchen-service/env/.env.compose
+    ports:
+      - "5001:5001"
+    restart: unless-stopped
+
+  consumer-service:
+    build:
+      context: ./consumer-service
+      dockerfile: Dockerfile
+      args:
+        GITHUB_DEPLOY_KEY: exec cat ~/.ssh/git
+    env_file: ./consumer-service/env/.env.compose
+    ports:
+      - "5002:5002"
+    restart: unless-stopped
+
+  accounting-service:
+    build:
+      context: ./accounting-service
+      dockerfile: Dockerfile
+      args:
+        GITHUB_DEPLOY_KEY: exec cat ~/.ssh/git
+    env_file: ./accounting-service/env/.env.compose
+    ports:
+      - "5003:5003"
+    restart: unless-stopped
+
+  mongo:
+    image: mongo
+    container_name: "mongo-multi-database"
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+
+  aws:
+    image: localstack/localstack:latest
+    container_name: localstack_demo
+    ports:
+      - '4566:4566' # localstack entrypoint
     environment:
-      HOST: 0.0.0.0
-      PORT: 5000
-      DB_HOST: db
-      REDIS_HOST: redis
-    command: ["./wait-for-it.sh", "db:5432", "--", "node", "index.js"]
-networks:
-  webnet:
+      - SERVICES=sns
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - LAMBDA_EXECUTOR=docker-reuse
+    volumes:
+      - './docker-volumes/localstack:/tmp/localstack'
+      - '/var/run/docker.sock:/var/run/docker.sock'
